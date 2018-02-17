@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from inputPipeline import *
+import os
 
 def get_initial_lstm(features,hidden_size):
 	net = features
@@ -101,9 +102,16 @@ def getModel(img,txt,labels,batch_size) :
 					
 
 	return loss/tf.to_float(batch_size)		
-	
+
+
+save_dir = './models/'
+train_file = 'merged_train.txt'	
 batch_size = 128
-img,text_batch,labels_batch = prepareExampleListQueue('merged_train.txt',batch_size = batch_size,num_threads=4)
+
+if not os.path.exists(save_dir) :
+	os.makedirs(save_dir)
+
+img,text_batch,labels_batch = prepareExampleListQueue(train_file,batch_size = batch_size,num_threads=4)
 
 
 text_batch = tf.one_hot(text_batch,21)
@@ -132,7 +140,7 @@ while 1 :
 	if step%100 == 0 :
 		print('after %d steps the loss is %g'%(step,losses))
 	if step%20000 == 0 and step > 0:
-		saver.save(sess,'./models/model_'+str(step))
+		saver.save(sess,save_dir + 'model_'+str(step))
 		print 'models saved'	
 	step+=1
 	
